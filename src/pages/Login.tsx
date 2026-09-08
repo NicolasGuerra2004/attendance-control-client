@@ -1,14 +1,28 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
+import { api } from '../api/axiosConfig';
 
 export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = (e: FormEvent) => {
-    e.preventDefault();
-    console.log({ email, password });
-  };
+  const handleLogin = async (e: FormEvent) => {
+  e.preventDefault();
+  
+  try {
+    const response = await api.post('/api/auth/login', {
+      email: email,
+      password: password
+    });
+    
+    console.log(response.data);
+    alert("Conectado");
+    
+  } catch (error) {
+    console.error(error);
+    alert("Error de conexión");
+  }
+};
 
   return (
     <div className="min-h-screen font-sans antialiased text-slate-800 bg-[#f8fafc] flex items-center justify-center relative overflow-hidden p-4 sm:p-6">
