@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Layout } from '../components/Layout';
+import { attendanceService, type DashboardMetricsDTO } from '../services/attendance.service';
 
 const mockAsistencia = [
   { id: 1, empleado: 'Mateo Herrera', entrada: '08:02 AM', salida: '--:--', estado: 'Presente' },
@@ -10,9 +11,40 @@ const mockAsistencia = [
 
 export const Dashboard = () => {
   const [registros] = useState(mockAsistencia);
+  const [metrics, setMetrics] = useState<DashboardMetricsDTO | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fetchMetrics = async (): Promise<DashboardMetricsDTO> => {
+    return attendanceService.getDashboardMetrics();
+  };
+
+  const loadMetrics = async () => {
+    try {
+      setMetrics(await fetchMetrics());
+    } catch {
+      setMetrics(null);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const loadInitialMetrics = async () => {
+      try {
+        setMetrics(await fetchMetrics());
+      } catch {
+        setMetrics(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void loadInitialMetrics();
+  }, []);
 
   const handleActualizar = () => {
-    console.log('Actualizando datos del dashboard...');
+    setIsLoading(true);
+    void loadMetrics();
   };
 
 
@@ -61,7 +93,7 @@ export const Dashboard = () => {
                 </div>
               </div>
               <div className="flex items-baseline space-x-2">
-                <span className="text-2xl font-bold text-slate-900 leading-tight">25</span>
+                <span className="text-2xl font-bold text-slate-900 leading-tight">{isLoading ? '...' : metrics ? metrics.presentToday + metrics.absentToday : '-'}</span>
               </div>
               <p className="text-[11px] text-slate-400 mt-1 font-medium">Planta Completa</p>
             </div>
@@ -76,7 +108,7 @@ export const Dashboard = () => {
                 </div>
               </div>
               <div className="flex items-baseline space-x-2">
-                <span className="text-2xl font-bold text-slate-900 leading-tight">22</span>
+                <span className="text-2xl font-bold text-slate-900 leading-tight">{isLoading ? '...' : metrics?.presentToday ?? '-'}</span>
               </div>
               <p className="text-[11px] text-emerald-600 mt-1 font-medium">88% de asistencia</p>
             </div>
@@ -91,7 +123,7 @@ export const Dashboard = () => {
                 </div>
               </div>
               <div className="flex items-baseline space-x-2">
-                <span className="text-2xl font-bold text-slate-900 leading-tight">3</span>
+                <span className="text-2xl font-bold text-slate-900 leading-tight">{isLoading ? '...' : metrics?.lateToday ?? '-'}</span>
               </div>
               <p className="text-[11px] text-amber-600 mt-1 font-medium">Atención requerida</p>
             </div>
@@ -106,7 +138,7 @@ export const Dashboard = () => {
                 </div>
               </div>
               <div className="flex items-baseline space-x-2">
-                <span className="text-2xl font-bold text-slate-900 leading-tight">0</span>
+                <span className="text-2xl font-bold text-slate-900 leading-tight">{isLoading ? '...' : metrics?.absentToday ?? '-'}</span>
               </div>
               <p className="text-[11px] text-slate-400 mt-1 font-medium">0% ausencias</p>
             </div>

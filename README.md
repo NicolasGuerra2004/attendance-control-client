@@ -1,75 +1,55 @@
-# React + TypeScript + Vite
+# QuimiControl Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend React + TypeScript + Vite para el control de asistencia y usuarios.
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Node.js compatible con las versiones instaladas en `package.json`.
+- Backend disponible con la API configurada en `VITE_API_URL`.
 
-## React Compiler
+## Configuración
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Crea un archivo `.env` a partir de `.env.example`:
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```env
+VITE_API_URL=http://localhost:3040
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+El archivo `.env` es local y no debe versionarse.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Comandos
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```bash
+npm install
+npm run dev
+npm run build
+npm run lint
+npm run preview
 ```
+
+## Rutas
+
+- `/login`: autenticación.
+- `/dashboard`: métricas generales.
+- `/usuarios`: administración de usuarios.
+- `/attendance`: registro de entrada y salida.
+- `/reportes`: reportes de asistencia.
+
+Las rutas internas requieren un token válido almacenado por el servicio de autenticación.
+
+## API esperada
+
+El frontend utiliza estos recursos relativos a `VITE_API_URL`:
+
+- `POST /api/auth/login`
+- `GET /api/attendance/dashboard`
+- `GET /api/attendance/has-checked-in-today`
+- `POST /api/attendance/check-in`
+- `POST /api/attendance/check-out`
+- `GET /api/users?estado=activo`
+- `GET /api/users/:id`
+- `POST /api/users`
+- `PUT /api/users/:id`
+- `DELETE /api/users/:id`
+
+El login debe responder un objeto con la propiedad `token`.

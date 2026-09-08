@@ -1,13 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
+import type { ReactNode } from 'react';
+import { authService } from '../services/auth.service';
 
 type LayoutProps = {
-  children: React.ReactNode;
+  children: ReactNode;
 };
 
 const navigationItems = [
   { label: 'Dashboard', to: '/dashboard', icon: 'dashboard' },
-  { label: 'Usuarios', to: '/usuarios', icon: 'users' },
-  { label: 'Reportes', to: '/reportes', icon: 'reports' },
+  { label: 'Usuarios', to: '/users', icon: 'users' },
+  { label: 'Reportes', to: '/reports', icon: 'reports' },
 ] as const;
 
 export const Layout = ({ children }: LayoutProps) => {
@@ -57,10 +59,21 @@ export const Layout = ({ children }: LayoutProps) => {
           <div className="w-9 h-9 rounded-full bg-slate-200 border-2 border-white shadow-sm flex items-center justify-center text-slate-600 font-semibold text-xs">
             AR
           </div>
-          <div className="overflow-hidden">
+          <div className="overflow-hidden flex-1">
             <p className="text-xs font-semibold text-slate-800 truncate leading-snug">Ing. Alberto Rossi</p>
             <p className="text-[11px] text-slate-400 font-normal truncate">Administrador</p>
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              authService.logout();
+              window.location.href = '/login';
+            }}
+            className="text-xs font-medium text-slate-500 hover:text-rose-600"
+            aria-label="Cerrar sesión"
+          >
+            Salir
+          </button>
         </div>
       </aside>
 

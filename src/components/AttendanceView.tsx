@@ -1,50 +1,92 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { attendanceService, type DashboardMetricsDTO } from '../services/attendance.service';
 
-export const AttendanceView: React.FC = () => {
+export const AttendanceView = () => {
   const [metrics, setMetrics] = useState<DashboardMetricsDTO | null>(null);
   const [checkedIn, setCheckedIn] = useState<boolean>(false);
   const [message, setMessage] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    loadAttendanceData();
-  }, []);
+  const fetchAttendanceData = async (): Promise<[DashboardMetricsDTO, boolean]> => {
+    const [dashboardData, status] = await Promise.all([
+      attendanceService.getDashboardMetrics(),
+      attendanceService.hasCheckedInToday(),
+    ]);
+
+    return [dashboardData, status];
+  };
 
   const loadAttendanceData = async () => {
     try {
-      const dashboardData = await attendanceService.getDashboardMetrics();
-      const status = await attendanceService.hasCheckedInToday();
+      const [dashboardData, status] = await fetchAttendanceData();
       setMetrics(dashboardData);
       setCheckedIn(status);
-    } catch (err) {
-      console.error('Error al cargar datos de asistencia', err);
+    } catch {
+      setMessage('No se pudieron cargar los datos de asistencia.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadInitialData = async () => {
+      try {
+        const [dashboardData, status] = await fetchAttendanceData();
+        if (isMounted) {
+          setMetrics(dashboardData);
+          setCheckedIn(status);
+        }
+      } catch {
+        if (isMounted) {
+          setMessage('No se pudieron cargar los datos de asistencia.');
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadInitialData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const handleCheckIn = async () => {
+    setIsSubmitting(true);
     try {
       await attendanceService.checkIn();
       setMessage('¡Entrada registrada con éxito!');
-      loadAttendanceData();
-    } catch (err) {
+      await loadAttendanceData();
+    } catch {
       setMessage('Error al registrar la entrada.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleCheckOut = async () => {
+    setIsSubmitting(true);
     try {
       await attendanceService.checkOut();
       setMessage('¡Salida registrada con éxito!');
-      loadAttendanceData();
-    } catch (err) {
+      await loadAttendanceData();
+    } catch {
       setMessage('Error al registrar la salida.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div>
       <h2>Control de Asistencia</h2>
-      {metrics && (
+      {isLoading && <p>Cargando datos...</p>}
+      {metrics && !isLoading && (
         <div>
           <p>Presentes hoy: {metrics.presentToday}</p>
           <p>Atrasos hoy: {metrics.lateToday}</p>
@@ -54,9 +96,13 @@ export const AttendanceView: React.FC = () => {
 
       <div>
         {!checkedIn ? (
-          <button onClick={handleCheckIn}>Marcar Entrada</button>
+          <button onClick={handleCheckIn} disabled={isSubmitting || isLoading}>
+            {isSubmitting ? 'Procesando...' : 'Marcar Entrada'}
+          </button>
         ) : (
-          <button onClick={handleCheckOut}>Marcar Salida</button>
+          <button onClick={handleCheckOut} disabled={isSubmitting || isLoading}>
+            {isSubmitting ? 'Procesando...' : 'Marcar Salida'}
+          </button>
         )}
       </div>
 

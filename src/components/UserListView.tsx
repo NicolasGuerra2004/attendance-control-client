@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { userService, type User } from '../services/user.service';
 
-export const UserListView: React.FC = () => {
+export const UserListView = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -11,7 +11,7 @@ export const UserListView: React.FC = () => {
       try {
         const data = await userService.getAllUsers('activo');
         setUsers(data);
-      } catch (err) {
+      } catch {
         setError('No se pudieron cargar los usuarios.');
       } finally {
         setLoading(false);
