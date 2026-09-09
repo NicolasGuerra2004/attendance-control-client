@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
-import { authService } from '../services/auth.service';
+import { authService, isAdminRole } from '../services/auth.service';
 
 export const Login = () => {
 	const [email, setEmail] = useState('');
@@ -14,8 +14,8 @@ export const Login = () => {
 		setIsSubmitting(true);
 
 		try {
-			await authService.login({ email, password });
-			window.location.href = '/dashboard';
+				const session = await authService.login({ email, password });
+				window.location.href = isAdminRole(session.rol) ? '/dashboard' : '/assist';
 		} catch {
 			setError('No fue posible iniciar sesión. Verifica tus credenciales.');
 		} finally {

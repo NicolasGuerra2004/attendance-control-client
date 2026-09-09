@@ -29,9 +29,21 @@ export interface UserUpdateDTO {
   address?: string;
 }
 
+export interface UserManagementDTO {
+  id: number;
+  fullName: string;
+  email: string;
+  status: string;
+}
+
 const API_URL = '/api/users';
 
 export const userService = {
+  async getManagementUsers(): Promise<UserManagementDTO[]> {
+    const response = await api.get<UserManagementDTO[]>(`${API_URL}/management`);
+    return response.data;
+  },
+
   async getAllUsers(estado: string = 'activo'): Promise<User[]> {
     const response = await api.get<User[]>(API_URL, { params: { estado } });
     return response.data;
@@ -55,4 +67,5 @@ export const userService = {
   async deleteUser(id: number): Promise<void> {
     await api.delete(`${API_URL}/${id}`);
   },
+
 };

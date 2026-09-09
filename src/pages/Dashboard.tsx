@@ -1,42 +1,97 @@
 import { useEffect, useState } from 'react';
 import { Layout } from '../components/Layout';
-import { attendanceService, type DashboardMetricsDTO } from '../services/attendance.service';
+import { attendanceService, type DailyRecordDTO, type DashboardMetricsDTO } from '../services/attendance.service';
+import { userService } from '../services/user.service';
 
-const mockAsistencia = [
-  { id: 1, empleado: 'Mateo Herrera', entrada: '08:02 AM', salida: '--:--', estado: 'Presente' },
-  { id: 2, empleado: 'Sofía Vergara', entrada: '08:14 AM', salida: '--:--', estado: 'Presente' },
-  { id: 3, empleado: 'Carlos Mendoza', entrada: '08:42 AM', salida: '--:--', estado: 'Atrasado' },
-  { id: 4, empleado: 'Javier Martínez', entrada: '--:--', salida: '--:--', estado: 'Ausente' },
-];
+const getRequestErrorMessage = (error: unknown, fallback: string): string => {
+  if (error && typeof error === 'object' && 'response' in error) {
+    const response = error.response;
+    if (response && typeof response === 'object' && 'status' in response && response.status === 403) {
+      return 'El backend rechazó el acceso al registro diario (403). Verifica los permisos del usuario administrador.';
+    }
+  }
+  return fallback;
+};
+
+const formatTime = (value: string): string => {
+  if (!value) return '--:--';
+  const timeOnly = value.match(/^(\d{2}):(\d{2})(?::\d{2})?/);
+  if (timeOnly) return `${timeOnly[1]}:${timeOnly[2]}`;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat('es-CL', { hour: '2-digit', minute: '2-digit', hour12: false }).format(date);
+};
 
 export const Dashboard = () => {
-  const [registros] = useState(mockAsistencia);
+  const [registros, setRegistros] = useState<DailyRecordDTO[]>([]);
   const [metrics, setMetrics] = useState<DashboardMetricsDTO | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [metricsError, setMetricsError] = useState('');
+  const [recordsError, setRecordsError] = useState('');
 
   const fetchMetrics = async (): Promise<DashboardMetricsDTO> => {
     return attendanceService.getDashboardMetrics();
   };
 
-  const loadMetrics = async () => {
+  const fetchTodayRecords = async (): Promise<DailyRecordDTO[]> => {
     try {
-      setMetrics(await fetchMetrics());
+      return await attendanceService.getTodayRecords();
     } catch {
-      setMetrics(null);
-    } finally {
-      setIsLoading(false);
+      return getTodayRecordsFallback();
     }
+  };
+
+  const loadMetrics = async () => {
+    setIsLoading(true);
+    setMetricsError('');
+    setRecordsError('');
+    const [metricsResult, recordsResult] = await Promise.allSettled([
+      fetchMetrics(),
+      fetchTodayRecords(),
+    ]);
+
+    if (metricsResult.status === 'fulfilled') {
+      setMetrics(metricsResult.value);
+    } else {
+      setMetrics(null);
+      setMetricsError('No se pudieron cargar las métricas.');
+    }
+
+    if (recordsResult.status === 'fulfilled') {
+      setRegistros(Array.isArray(recordsResult.value) ? recordsResult.value : []);
+    } else {
+      setRegistros([]);
+      setRecordsError(getRequestErrorMessage(recordsResult.reason, 'No se pudo cargar el registro de asistencia de hoy.'));
+    }
+
+    setIsLoading(false);
   };
 
   useEffect(() => {
     const loadInitialMetrics = async () => {
-      try {
-        setMetrics(await fetchMetrics());
-      } catch {
+      setIsLoading(true);
+      setMetricsError('');
+      setRecordsError('');
+      const [metricsResult, recordsResult] = await Promise.allSettled([
+        fetchMetrics(),
+        fetchTodayRecords(),
+      ]);
+
+      if (metricsResult.status === 'fulfilled') {
+        setMetrics(metricsResult.value);
+      } else {
         setMetrics(null);
-      } finally {
-        setIsLoading(false);
+        setMetricsError('No se pudieron cargar las métricas.');
       }
+
+      if (recordsResult.status === 'fulfilled') {
+        setRegistros(Array.isArray(recordsResult.value) ? recordsResult.value : []);
+      } else {
+        setRegistros([]);
+        setRecordsError(getRequestErrorMessage(recordsResult.reason, 'No se pudo cargar el registro de asistencia de hoy.'));
+      }
+
+      setIsLoading(false);
     };
 
     void loadInitialMetrics();
@@ -49,10 +104,11 @@ export const Dashboard = () => {
 
 
   const getBadgeColor = (estado: string) => {
-    switch (estado) {
-      case 'Presente': return 'bg-emerald-50 text-emerald-600 border-emerald-200/60';
-      case 'Atrasado': return 'bg-amber-50 text-amber-600 border-amber-200/60';
-      case 'Ausente': return 'bg-rose-50 text-rose-600 border-rose-200/60';
+    switch (estado.trim().toUpperCase()) {
+      case 'PRESENTE': return 'bg-emerald-50 text-emerald-600 border-emerald-200/60';
+      case 'ATRASADO':
+      case 'ATRASO': return 'bg-amber-50 text-amber-600 border-amber-200/60';
+      case 'AUSENTE': return 'bg-rose-50 text-rose-600 border-rose-200/60';
       default: return 'bg-slate-50 text-slate-600 border-slate-200/60';
     }
   };
@@ -143,12 +199,14 @@ export const Dashboard = () => {
               <p className="text-[11px] text-slate-400 mt-1 font-medium">0% ausencias</p>
             </div>
           </div>
+          {metricsError && <p className="text-sm text-rose-600" role="alert">{metricsError}</p>}
 
           {/* ATTENDANCE TABLE */}
           <section className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100">
               <h3 className="text-sm font-semibold text-slate-800">Registro de Asistencia de Hoy</h3>
             </div>
+            {recordsError && <p className="px-6 py-3 text-sm text-rose-600" role="alert">{recordsError}</p>}
             
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse text-xs">
@@ -162,15 +220,15 @@ export const Dashboard = () => {
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-slate-600 font-medium">
                   {registros.map((registro) => (
-                    <tr key={registro.id} className="hover:bg-slate-50/70 transition-colors">
-                      <td className="py-4 px-6 font-medium text-slate-800">{registro.empleado}</td>
-                      <td className={`py-4 px-6 ${registro.entrada === '--:--' ? 'text-slate-400' : 'text-slate-600'}`}>
-                        {registro.entrada}
+                    <tr key={registro.userId} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="py-4 px-6 font-medium text-slate-800">{registro.fullName}</td>
+                      <td className={`py-4 px-6 ${!registro.entryTime ? 'text-slate-400' : 'text-slate-600'}`}>
+                        {formatTime(registro.entryTime)}
                       </td>
-                      <td className="py-4 px-6 text-slate-400">{registro.salida}</td>
+                      <td className="py-4 px-6 text-slate-400">{formatTime(registro.departureTime)}</td>
                       <td className="py-4 px-6 text-center">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${getBadgeColor(registro.estado)}`}>
-                          {registro.estado}
+                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium border ${getBadgeColor(registro.status)}`}>
+                          {registro.status}
                         </span>
                       </td>
                     </tr>
@@ -183,4 +241,42 @@ export const Dashboard = () => {
         </div>
     </Layout>
   );
+};
+
+const getToday = (): string => {
+  const date = new Date();
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+};
+
+const isToday = (value: string): boolean => {
+  const datePart = value.match(/^\d{4}-\d{2}-\d{2}/)?.[0];
+  if (datePart === getToday()) return true;
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return false;
+  const localDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  return localDate === getToday();
+};
+
+const getTodayRecordsFallback = async (): Promise<DailyRecordDTO[]> => {
+  const users = await userService.getManagementUsers();
+  const recordsByUser = await Promise.all(users.map(async (user) => ({
+    user,
+    records: (await attendanceService.getAttendanceByUser(user.id)).filter((record) => isToday(record.date)),
+  })));
+
+  return recordsByUser.map(({ user, records }) => {
+    const latestRecord = (type: 'ENTRADA' | 'SALIDA') => records
+      .filter((record) => record.typeAttendance.trim().toUpperCase() === type)
+      .sort((left, right) => new Date(right.date).getTime() - new Date(left.date).getTime())[0];
+    const entry = latestRecord('ENTRADA');
+    const departure = latestRecord('SALIDA');
+    return {
+      userId: user.id,
+      fullName: user.fullName,
+      entryTime: entry?.date ?? '',
+      departureTime: departure?.date ?? '',
+      status: entry ? 'Presente' : 'Ausente',
+    };
+  });
 };
