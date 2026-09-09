@@ -17,14 +17,10 @@ export interface AttendanceResponseDTO {
 
 export interface AttendanceRecordDTO {
   id: number;
+  userId: number;
   typeAttendance: 'ENTRADA' | 'SALIDA';
   date: string;
   ipOrigin?: string;
-  user?: {
-    id: number;
-    name: string;
-    lastName: string;
-  };
 }
 
 export interface DashboardMetricsDTO {
@@ -36,8 +32,8 @@ export interface DashboardMetricsDTO {
 export interface DailyRecordDTO {
   userId: number;
   fullName: string;
-  entryTime: string;
-  departureTime: string;
+  entryTime: string | null;
+  departureTime: string | null;
   status: string;
 }
 
@@ -102,30 +98,6 @@ export const attendanceService = {
   async getTodayRecords(): Promise<DailyRecordDTO[]> {
     const response = await api.get<DailyRecordDTO[]>(`${API_URL}/today`);
     return Array.isArray(response.data) ? response.data : [];
-  },
-
-  async getAttendanceByUser(userId: number): Promise<AttendanceRecordDTO[]> {
-    const response = await api.get<string>(`${API_URL}/user/${userId}`, { responseType: 'text' });
-    const body = response.data;
-
-    try {
-      const parsed = JSON.parse(body) as AttendanceRecordDTO[];
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      const records: AttendanceRecordDTO[] = [];
-      const pattern = /"id"\s*:\s*(\d+)\s*,\s*"typeAttendance"\s*:\s*"([^"]+)"\s*,\s*"date"\s*:\s*"([^"]+)"/g;
-      let match: RegExpExecArray | null;
-
-      while ((match = pattern.exec(body)) !== null) {
-        records.push({
-          id: Number(match[1]),
-          typeAttendance: match[2].toUpperCase() as 'ENTRADA' | 'SALIDA',
-          date: match[3],
-        });
-      }
-
-      return records;
-    }
   },
 
   async getLateArrivals(date: string): Promise<LateArrivalReportDTO[]> {
