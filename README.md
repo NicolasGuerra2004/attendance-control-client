@@ -17,6 +17,10 @@ VITE_API_URL=http://localhost:3040
 
 El archivo `.env` es local y no debe versionarse.
 
+Durante el desarrollo, Vite redirige automáticamente las rutas `/api` al backend
+local configurado en `vite.config.ts`. En producción, `VITE_API_URL` debe apuntar
+al origen público del backend.
+
 ## Comandos
 
 ```bash

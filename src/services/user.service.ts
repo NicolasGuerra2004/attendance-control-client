@@ -7,8 +7,21 @@ export interface User {
   lastName: string;
   phone?: string;
   address?: string;
+  createAt?: string;
+  updateAt?: string;
   createdAt?: string;
   updatedAt?: string;
+}
+
+export interface Page<T> {
+  content: T[];
+  totalPages: number;
+  totalElements: number;
+  size: number;
+  number: number;
+  first: boolean;
+  last: boolean;
+  empty: boolean;
 }
 
 export interface UserCreateDTO {
@@ -68,4 +81,10 @@ export const userService = {
     await api.delete(`${API_URL}/${id}`);
   },
 
+  async getUsersPaginated(page: number = 0, size: number = 10, sort: string = 'name'): Promise<Page<User>> {
+    const response = await api.get<Page<User>>(`${API_URL}/paginated`, {
+      params: { page, size, sort },
+    });
+    return response.data;
+  },
 };

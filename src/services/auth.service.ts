@@ -12,6 +12,26 @@ export interface LoginResponseDTO {
 	rol: string;
 }
 
+export interface RegisterRequestDTO {
+	rut: string;
+	name: string;
+	lastName: string;
+	phone?: string;
+	address?: string;
+	email: string;
+	password: string;
+}
+
+const normalizeLoginResponse = (data: LoginResponseDTO | LoginResponseDTO[]): LoginResponseDTO => {
+	const session = Array.isArray(data) ? data[0] : data;
+
+	if (!session || typeof session.token !== 'string' || !session.token.trim()) {
+		throw new Error('El servidor devolvió una sesión de login inválida.');
+	}
+
+	return session;
+};
+
 const SESSION_KEY = 'auth_session';
 
 export const isAdminRole = (role: string | undefined): boolean => {
@@ -22,9 +42,15 @@ export const isAdminRole = (role: string | undefined): boolean => {
 export const authService = {
 	async login(credentials: LoginRequestDTO): Promise<LoginResponseDTO> {
 		this.clearSession();
-		const response = await api.post<LoginResponseDTO>('/api/auth/login', credentials);
-		localStorage.setItem('token', response.data.token);
-		localStorage.setItem(SESSION_KEY, JSON.stringify(response.data));
+		const response = await api.post<LoginResponseDTO | LoginResponseDTO[]>('/api/auth/login', credentials);
+		const session = normalizeLoginResponse(response.data);
+		localStorage.setItem('token', session.token);
+		localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+		return session;
+	},
+
+	async register(userData: RegisterRequestDTO): Promise<unknown> {
+		const response = await api.post('/api/auth/register', userData);
 		return response.data;
 	},
 

@@ -17,7 +17,13 @@ export interface AttendanceResponseDTO {
 
 export interface AttendanceRecordDTO {
   id: number;
-  userId: number;
+  userId?: number;
+  user?: {
+    id: number;
+    name: string;
+    lastName: string;
+    rut?: string;
+  };
   typeAttendance: 'ENTRADA' | 'SALIDA';
   date: string;
   ipOrigin?: string;
@@ -39,8 +45,8 @@ export interface DailyRecordDTO {
 
 export interface WeeklyHistoryDTO {
   date: string;
-  entryTime: string;
-  departureTime: string;
+  entryTime: string | null;
+  departureTime: string | null;
   status: string;
 }
 
@@ -112,6 +118,23 @@ export const attendanceService = {
 
   async getAbsenteeism(date: string): Promise<AbsenteeismReportDTO[]> {
     const response = await api.get<AbsenteeismReportDTO[]>(`${API_URL}/reports/absenteeism`, { params: { date } });
+    return Array.isArray(response.data) ? response.data : [];
+  },
+
+  async registerAttendance(requestDTO: AttendanceRequestDTO): Promise<AttendanceResponseDTO> {
+    const response = await api.post<AttendanceResponseDTO>(`${API_URL}/register`, requestDTO);
+    return response.data;
+  },
+
+  async getAttendanceByUser(userId: number): Promise<AttendanceRecordDTO[]> {
+    const response = await api.get<AttendanceRecordDTO[]>(`${API_URL}/user/${userId}`);
+    return Array.isArray(response.data) ? response.data : [];
+  },
+
+  async getAttendanceByUserAndRange(userId: number, startDate?: string, endDate?: string): Promise<AttendanceRecordDTO[]> {
+    const response = await api.get<AttendanceRecordDTO[]>(`${API_URL}/user/${userId}/range`, {
+      params: { startDate, endDate },
+    });
     return Array.isArray(response.data) ? response.data : [];
   },
 };
