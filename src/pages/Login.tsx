@@ -7,6 +7,25 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
   return getApiErrorMessage(error, fallback);
 };
 
+const getRegisterErrorMessage = (error: unknown): string => {
+  const fallback = 'No fue posible registrar la cuenta. Verifica que el RUT y correo no estén duplicados.';
+  const message = getErrorMessage(error, fallback);
+  const normalizedMessage = message.toLowerCase();
+  const refersToEmail = normalizedMessage.includes('email') || normalizedMessage.includes('correo');
+  const indicatesDuplicate =
+    normalizedMessage.includes('exist') ||
+    normalizedMessage.includes('registr') ||
+    normalizedMessage.includes('duplic') ||
+    normalizedMessage.includes('already') ||
+    normalizedMessage.includes('unique');
+
+  if (refersToEmail && indicatesDuplicate) {
+    return 'El correo electrónico ya está registrado. Utiliza otro correo para crear la cuenta.';
+  }
+
+  return message;
+};
+
 export const Login = () => {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [email, setEmail] = useState('');
@@ -54,7 +73,7 @@ export const Login = () => {
       setPassword('');
       setMode('login');
     } catch (err) {
-      setError(getErrorMessage(err, 'No fue posible registrar la cuenta. Verifica que el RUT y correo no estén duplicados.'));
+      setError(getRegisterErrorMessage(err));
     } finally {
       setIsSubmitting(false);
     }
