@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { authService } from '../services/auth.service';
 
@@ -16,6 +17,7 @@ const navigationItems = [
 export const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const session = authService.getSession();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const fullName = session?.fullName?.trim() || 'Administrador';
   const roleLabel = session?.rol === 'ADMIN' ? 'Administrador' : 'Colaborador';
@@ -28,10 +30,10 @@ export const Layout = ({ children }: LayoutProps) => {
     .toUpperCase() || 'AD';
 
   return (
-    <div className="min-h-screen flex bg-slate-50 text-slate-800 antialiased font-sans">
-      <aside className="w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 min-h-screen sticky top-0">
+    <div className="min-h-screen flex flex-col md:flex-row bg-slate-50 text-slate-800 antialiased font-sans">
+      <aside className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-slate-200 flex flex-col justify-between shrink-0 md:min-h-screen sticky top-0 z-20">
         <div>
-          <div className="p-6 pb-8">
+          <div className="p-4 sm:p-6 md:pb-8">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-lg bg-emerald-600 flex items-center justify-center text-white shadow-sm shadow-emerald-200">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
@@ -42,10 +44,25 @@ export const Layout = ({ children }: LayoutProps) => {
                 <h1 className="text-base font-bold text-slate-900 tracking-tight leading-none">QuimiControl</h1>
                 <span className="text-[10px] font-semibold text-slate-400 tracking-wider uppercase block mt-1">Asistencia Industrial</span>
               </div>
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen((open) => !open)}
+                className="ml-auto inline-flex md:hidden w-9 h-9 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                aria-label={isMobileMenuOpen ? 'Ocultar navegación' : 'Mostrar navegación'}
+                aria-expanded={isMobileMenuOpen}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  {isMobileMenuOpen ? (
+                    <path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                  ) : (
+                    <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" />
+                  )}
+                </svg>
+              </button>
             </div>
           </div>
 
-          <nav className="px-3 space-y-1" aria-label="Navegación principal">
+          <nav className={`${isMobileMenuOpen ? 'grid' : 'hidden'} md:flex md:flex-col px-3 pb-3 md:pb-0 grid-cols-2 gap-1 md:space-y-1`} aria-label="Navegación principal">
             {navigationItems.map((item) => {
               const isActive = location.pathname === item.to;
               const linkClassName = isActive
@@ -54,7 +71,7 @@ export const Layout = ({ children }: LayoutProps) => {
               const iconClassName = isActive ? 'w-4 h-4 text-emerald-600' : 'w-4 h-4 text-slate-400';
 
               return (
-                <Link key={item.to} className={linkClassName} to={item.to} aria-current={isActive ? 'page' : undefined}>
+                <Link key={item.to} className={linkClassName} to={item.to} onClick={() => setIsMobileMenuOpen(false)} aria-current={isActive ? 'page' : undefined}>
                   <svg className={iconClassName} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
                     {item.icon === 'dashboard' && <><rect height="9" rx="1" width="7" x="3" y="3" /><rect height="5" rx="1" width="7" x="14" y="3" /><rect height="9" rx="1" width="7" x="14" y="12" /><rect height="5" rx="1" width="7" x="3" y="16" /></>}
                     {item.icon === 'users' && <path d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" />}
@@ -90,7 +107,7 @@ export const Layout = ({ children }: LayoutProps) => {
         </div>
       </aside>
 
-      <main className="flex-1 min-w-0 overflow-y-auto">
+      <main className="flex-1 min-w-0 overflow-x-hidden">
         {children}
       </main>
     </div>

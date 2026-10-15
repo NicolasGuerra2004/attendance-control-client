@@ -129,6 +129,15 @@ export const Assist = () => {
   }, []);
 
   const handleAttendance = async (action: 'checkIn' | 'checkOut') => {
+    if (
+      isLoading ||
+      isSubmitting ||
+      (action === 'checkIn' && attendanceState !== 'not-started') ||
+      (action === 'checkOut' && attendanceState !== 'checked-in')
+    ) {
+      return;
+    }
+
     setIsSubmitting(true);
     setMessage('');
     setError('');
@@ -142,6 +151,9 @@ export const Assist = () => {
         setMessage('¡Salida registrada correctamente!');
       }
       await loadAttendance();
+      if (action === 'checkOut') {
+        setAttendanceState('completed');
+      }
     } catch (err) {
       setError(getApiErrorMessage(
         err,
@@ -214,7 +226,7 @@ export const Assist = () => {
       </header>
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-6 py-10 flex flex-col justify-center">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-stretch">
           <section className="lg:col-span-5 flex flex-col justify-between bg-white rounded-2xl border border-slate-200/90 shadow-sm p-8 sm:p-10">
             <div className="text-center">
               <span className="inline-block text-[11px] font-bold tracking-widest text-slate-400 uppercase">

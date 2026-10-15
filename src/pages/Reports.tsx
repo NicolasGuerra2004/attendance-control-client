@@ -97,7 +97,7 @@ export const Reports = () => {
 
   return (
     <Layout>
-      <div className="max-w-7xl w-full mx-auto space-y-6 p-8">
+      <div className="max-w-7xl w-full mx-auto space-y-5 sm:space-y-6 p-4 sm:p-6 lg:p-8">
         <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold text-slate-900 tracking-tight">Reportes de Asistencia</h2>
@@ -117,7 +117,7 @@ export const Reports = () => {
         </header>
 
         <section className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-1">
-          <div className="inline-flex p-1 bg-slate-100 border border-slate-200/80 rounded-xl space-x-1">
+          <div className="inline-flex max-w-full overflow-x-auto p-1 bg-slate-100 border border-slate-200/80 rounded-xl space-x-1">
             <button
               onClick={() => setActiveTab('late')}
               className={`px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
@@ -189,7 +189,7 @@ export const Reports = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
+              <table className="w-full min-w-[620px] text-left border-collapse text-xs">
                 <thead>
                   <tr className="border-b border-slate-100 text-[11px] font-semibold text-slate-400 uppercase tracking-wider bg-slate-50/70">
                     <th className="py-3 px-6">ID</th>

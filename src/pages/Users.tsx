@@ -194,7 +194,7 @@ export const Users = () => {
 
   return (
     <Layout>
-      <div className="p-8 max-w-7xl w-full mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-5 sm:space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold text-slate-900 tracking-tight">Gestión de Usuarios</h2>
@@ -225,7 +225,7 @@ export const Users = () => {
         )}
 
         <section className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="inline-flex rounded-lg bg-slate-100 p-0.5 text-xs font-medium text-slate-600">
               {(['TODOS', 'ACTIVO', 'INACTIVO'] as const).map((filter) => (
                 <button
@@ -290,7 +290,7 @@ export const Users = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+              <table className="w-full min-w-[720px] text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/70 text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
                     <th className="py-3 px-6">ID</th>
@@ -356,7 +356,7 @@ export const Users = () => {
           role="dialog"
           aria-modal="true"
         >
-          <div className="w-full max-w-xl bg-white rounded-2xl shadow-2xl p-6 sm:p-7 border border-slate-100">
+          <div className="w-full max-w-xl max-h-[calc(100vh-2rem)] overflow-y-auto bg-white rounded-2xl shadow-2xl p-5 sm:p-7 border border-slate-100">
             <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
               <div>
                 <h3 className="text-base font-bold text-slate-900">

@@ -127,7 +127,7 @@ export const Dashboard = () => {
 
   return (
     <Layout>
-      <div className="p-8 max-w-7xl w-full mx-auto space-y-6">
+      <div className="p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto space-y-5 sm:space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold text-slate-900 tracking-tight">Panel de Control</h2>
@@ -165,7 +165,7 @@ export const Dashboard = () => {
         )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-semibold text-slate-600">Total Empleados</span>
               <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center text-slate-500 border border-slate-100">
@@ -187,7 +187,7 @@ export const Dashboard = () => {
             <p className="text-[11px] text-slate-400 mt-1 font-medium">Planta Completa Activa</p>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-semibold text-slate-600">Presentes Hoy</span>
               <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100">
@@ -204,7 +204,7 @@ export const Dashboard = () => {
             <p className="text-[11px] text-emerald-600 mt-1 font-semibold">{attendanceRate}% de asistencia</p>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-semibold text-slate-600">Atrasos Hoy</span>
               <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 border border-amber-100">
@@ -226,7 +226,7 @@ export const Dashboard = () => {
             <p className="text-[11px] text-amber-600 mt-1 font-medium">Ingreso después de 09:30</p>
           </div>
 
-          <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm hover:shadow-md transition-shadow">
+          <div className="bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-semibold text-slate-600">Inasistencias</span>
               <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600 border border-rose-100">
@@ -245,14 +245,14 @@ export const Dashboard = () => {
         </div>
 
         <section className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-          <div className="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h3 className="text-sm font-bold text-slate-900">Registros de Asistencia del Día</h3>
               <p className="text-xs text-slate-400 mt-0.5">Control de entradas y salidas de la jornada actual</p>
             </div>
 
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-              <div className="inline-flex rounded-lg bg-slate-100 p-0.5 text-xs font-medium text-slate-600">
+              <div className="inline-flex max-w-full overflow-x-auto rounded-lg bg-slate-100 p-0.5 text-xs font-medium text-slate-600">
                 {(['TODOS', 'PRESENTES', 'ATRASADOS', 'INASISTENTES'] as const).map((filter) => (
                   <button
                     key={filter}
@@ -323,7 +323,7 @@ export const Dashboard = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse">
+              <table className="w-full min-w-[620px] text-left text-xs border-collapse">
                 <thead>
                   <tr className="border-b border-slate-100 bg-slate-50/70 text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
                     <th className="py-3 px-6">Colaborador</th>

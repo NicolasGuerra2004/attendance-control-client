@@ -61,7 +61,7 @@ export const Login = () => {
   };
 
   return (
-    <div className="min-h-screen font-sans antialiased text-slate-800 bg-[#f8fafc] flex items-center justify-center relative overflow-hidden p-4 sm:p-6">
+    <div className="min-h-screen font-sans antialiased text-slate-800 bg-[#f8fafc] flex items-center justify-center relative overflow-hidden p-3 sm:p-6">
       <div
         className="absolute w-[500px] h-[500px] rounded-full bottom-[-100px] right-[10%] sm:right-[20%] pointer-events-none z-0 blur-[40px]"
         style={{
@@ -78,7 +78,7 @@ export const Login = () => {
       />
 
       <main className="w-full max-w-md relative z-10 my-8">
-        <div className="bg-white rounded-2xl shadow-[0_10px_35px_-4px_rgba(0,0,0,0.06),0_4px_12px_-2px_rgba(0,0,0,0.03)] border border-slate-100 p-8 sm:p-10 transition-all duration-300">
+        <div className="bg-white rounded-2xl shadow-[0_10px_35px_-4px_rgba(0,0,0,0.06),0_4px_12px_-2px_rgba(0,0,0,0.03)] border border-slate-100 p-5 sm:p-10 transition-all duration-300">
           <header className="flex flex-col items-center text-center mb-6">
             <div className="w-14 h-14 rounded-2xl bg-emerald-600 flex items-center justify-center shadow-md shadow-emerald-600/25 mb-4 text-white">
               <svg className="w-7 h-7 stroke-[2]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
