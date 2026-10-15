@@ -178,6 +178,8 @@ export const Assist = () => {
     .slice(0, 2)
     .join('')
     .toUpperCase();
+  const isCheckInDisabled = isLoading || isSubmitting || attendanceState !== 'not-started';
+  const isCheckOutDisabled = isLoading || isSubmitting || attendanceState !== 'checked-in';
 
   return (
     <div className="min-h-screen flex flex-col font-sans text-slate-700 antialiased bg-[#f8fafc]">
@@ -246,16 +248,24 @@ export const Assist = () => {
               <div className="grid grid-cols-2 gap-3.5">
                 <button
                   onClick={() => void handleAttendance('checkIn')}
-                  disabled={isLoading || isSubmitting || attendanceState !== 'not-started'}
-                  className="px-4 py-3 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm shadow-sm transition-all"
+                  disabled={isCheckInDisabled}
+                  className={`px-4 py-3 rounded-xl font-semibold text-sm shadow-sm transition-all ${
+                    isCheckInDisabled
+                      ? 'bg-slate-200 text-slate-400 cursor-not-allowed pointer-events-none'
+                      : 'bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800'
+                  }`}
                   type="button"
                 >
                   {isSubmitting && attendanceState === 'not-started' ? 'Procesando...' : 'Marcar Entrada'}
                 </button>
                 <button
                   onClick={() => void handleAttendance('checkOut')}
-                  disabled={isLoading || isSubmitting || attendanceState !== 'checked-in'}
-                  className="px-4 py-3 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm shadow-sm transition-all"
+                  disabled={isCheckOutDisabled}
+                  className={`px-4 py-3 rounded-xl font-semibold text-sm shadow-sm transition-all ${
+                    isCheckOutDisabled
+                      ? 'bg-slate-200 text-slate-400 cursor-not-allowed pointer-events-none'
+                      : 'bg-rose-600 text-white hover:bg-rose-700 active:bg-rose-800'
+                  }`}
                   type="button"
                 >
                   {isSubmitting && attendanceState === 'checked-in' ? 'Procesando...' : 'Marcar Salida'}
